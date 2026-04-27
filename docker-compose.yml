@@ -1,0 +1,34 @@
+version: "3.9"
+
+services:
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  app:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - REDIS_URL=redis://redis:6379
+      - DATABASE_URL=sqlite:///./llm-gateway.db
+      - CACHE_SIMILARITY_THRESHOLD=0.92
+    depends_on:
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./llm-gateway.db:/app/llm-gateway.db
+      - .:/app  # mount for hot reload during dev
+
+volumes:
+  redis_data:

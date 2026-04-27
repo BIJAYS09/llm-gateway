@@ -1,16 +1,35 @@
-from sqlalchemy import Column, String, Float, Integer, DateTime
-from sqlalchemy.orm import DeclarativeBase
-from datetime import datetime, UTC
+from sqlalchemy.orm import Session
 
-class Base(DeclarativeBase): pass
+from app.metrics.models import LLMCall
 
-class LLMCall(Base):
-    __tablename__ = "llm_calls"
-    id           = Column(Integer, primary_key=True)
-    model        = Column(String)
-    prompt_tokens  = Column(Integer)
-    completion_tokens = Column(Integer)
-    cost_usd     = Column(Float)
-    latency_ms   = Column(Float)
-    cache_hit    = Column(Integer, default=0)  # 0 or 1
-    created_at   = Column(DateTime, default=lambda: datetime.now(UTC))
+
+def log_call(
+    db: Session,
+    request_id: str,
+    requested_model: str,
+    routed_model: str,
+    prompt_tokens: int,
+    completion_tokens: int,
+    cost_usd: float,
+    latency_ms: float,
+    cache_hit: bool,
+) -> LLMCall:
+    """
+    Persist a single LLM call record to the database.
+    Returns the saved record.
+    """
+    call = LLMCall(
+        request_id=request_id,
+        requested_model=requested_model,
+        routed_model=routed_model,
+        prompt_tokens=prompt_tokens,
+        completion_tokens=completion_tokens,
+        total_tokens=prompt_tokens + completion_tokens,
+        cost_usd=cost_usd,
+        latency_ms=latency_ms,
+        cache_hit=cache_hit,
+    )
+    db.add(call)
+    db.commit()
+    db.refresh(call)
+    return call

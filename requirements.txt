@@ -3,5 +3,17 @@ sqlalchemy
 openai
 pydantic
 fastapi
+uvicorn
+redis
+pydantic
+pydantic-settings
+numpy
+python-dotenv
+
+# Testing
+pytest
+pytest-asyncio
+httpx
+
 
 
