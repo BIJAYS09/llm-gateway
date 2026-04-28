@@ -17,6 +17,7 @@ router = APIRouter(tags=["proxy"])
 
 # Lazy import to avoid circular deps
 _openai_client = None
+_groq_client = None
 
 
 def get_openai():
@@ -25,6 +26,15 @@ def get_openai():
         from openai import AsyncOpenAI
         _openai_client = AsyncOpenAI(api_key=settings.openai_api_key)
     return _openai_client
+
+
+def get_groq():
+    global _groq_client
+    if _groq_client is None:
+        from groq import AsyncGroq
+        _groq_client = AsyncGroq(api_key=settings.groq_api_key)
+        print("Initialized Groq client with provided API key.",settings.groq_api_key)
+    return _groq_client
 
 
 @router.post("/v1/chat/completions")
@@ -69,9 +79,19 @@ async def chat_completions(
     routed_model = route_model(request)
 
     # ── 3. Call the LLM ────────────────────────────────────────────────────────
-    openai_client = get_openai()
+    # openai_client = get_openai()
+    groq_client = get_groq()
     try:
-        response = await openai_client.chat.completions.create(
+        # response = await openai_client.chat.completions.create(
+        #     model=routed_model,
+        #     messages=[
+        #         {"role": m.role, "content": m.content}
+        #         for m in request.messages
+        #     ],
+        #     temperature=request.temperature,
+        #     max_tokens=request.max_tokens,
+        # )
+        response = await groq_client.chat.completions.create(
             model=routed_model,
             messages=[
                 {"role": m.role, "content": m.content}

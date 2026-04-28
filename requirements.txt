@@ -9,6 +9,11 @@ pydantic
 pydantic-settings
 numpy
 python-dotenv
+sentence-transformers
+groq
+playwright
+
+
 
 # Testing
 pytest

@@ -7,6 +7,7 @@ from app.api.dashboard import router as dashboard_router
 from app.api.proxy import router as proxy_router
 from app.cache.redis_client import close_redis
 from app.dependencies import create_tables
+from app.api.llm_price_router import router as llm_price_router
 
 
 @asynccontextmanager
@@ -36,6 +37,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(llm_price_router)
 app.include_router(proxy_router)
 app.include_router(dashboard_router)
 

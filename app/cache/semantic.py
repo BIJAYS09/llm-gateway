@@ -2,10 +2,11 @@ import hashlib
 import json
 import numpy as np
 from openai import AsyncOpenAI
-
+from sentence_transformers import SentenceTransformer
 from app.config import settings
 
 _openai_client = None
+_embed_model = None
 
 
 def get_openai_client() -> AsyncOpenAI:
@@ -14,15 +15,24 @@ def get_openai_client() -> AsyncOpenAI:
         _openai_client = AsyncOpenAI(api_key=settings.openai_api_key)
     return _openai_client
 
+def get_embedding_model():
+    global _embed_model
+    if _embed_model is None:
+        _embed_model = SentenceTransformer("all-MiniLM-L6-v2")
+    return _embed_model
+
+# async def embed(text: str) -> list[float]:
+#     client = get_openai_client()
+#     response = await client.embeddings.create(
+#         model=settings.embedding_model,
+#         input=text[:8000],  # embedding model token limit safety
+#     )
+#     return response.data[0].embedding
 
 async def embed(text: str) -> list[float]:
-    client = get_openai_client()
-    response = await client.embeddings.create(
-        model=settings.embedding_model,
-        input=text[:8000],  # embedding model token limit safety
-    )
-    return response.data[0].embedding
-
+    model = get_embedding_model()
+    embedding = model.encode(text[:8000])
+    return embedding.tolist()
 
 def cosine_similarity(a: list[float], b: list[float]) -> float:
     a_arr = np.array(a, dtype=np.float32)
