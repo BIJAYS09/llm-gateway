@@ -89,7 +89,7 @@ def build_pricing_map(table):
 
     for row in table:
         model_name = row["AI Model"]
-        model = MODEL_NAME_MAP.get(model, model)
+        model = MODEL_NAME_MAP.get(model_name)
 
         input_price_per_million = extract_price(
             row["Input Token Price (Per Million Tokens)"]
