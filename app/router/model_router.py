@@ -99,7 +99,7 @@ def build_pricing_map(table):
         )
 
         # Convert → per 1K tokens
-        pricing[model_name] = {
+        pricing[model] = {
             "input": input_price_per_million / 1000,
             "output": output_price_per_million / 1000,
         }
